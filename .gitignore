@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+dist/
+.env
+.env.*
+!.env.example
+*.log
+*.sqlite*
+*.db
+.task*
+task.txt
+handoff.txt
+.harness/
+.agent-harness/
+config/local.*

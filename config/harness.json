@@ -1,0 +1,282 @@
+{
+  "schema_version": 1,
+  "hosts": {
+    "codex": {
+      "model": "gpt-6-astra",
+      "reasoning_effort": "ultra",
+      "reasoning_summary": "concise",
+      "service_tier": "ultrafast",
+      "roles": {
+        "feature, refactoring": [
+          "gpt-6-sol"
+        ],
+        "bug-fix": [
+          "gpt-6-sol"
+        ],
+        "perf-issue": [
+          "gpt-6-sol"
+        ],
+        "hillclimb": [
+          "gpt-6-sol"
+        ],
+        "judgment and prose": [
+          "gpt-6-sol"
+        ],
+        "strongest judgment": [
+          "gpt-6-sol"
+        ],
+        "how explorer": [
+          "gpt-5.6-terra"
+        ],
+        "how explainer": [
+          "gpt-6-sol"
+        ],
+        "how critics": [
+          "gpt-6-astra",
+          "gpt-6-sol",
+          "gpt-6-luna",
+          "claude-opus-5-5",
+          "claude-fable-5-1"
+        ],
+        "why investigators": [
+          "gpt-5.6-terra"
+        ],
+        "why synthesizer": [
+          "gpt-6-sol"
+        ],
+        "reflect tooling": [
+          "gpt-6-luna"
+        ],
+        "reflect judgment, divergent, synthesizer": [
+          "gpt-6-sol"
+        ],
+        "arena runners": [
+          "gpt-6-astra",
+          "gpt-6-sol",
+          "gpt-6-luna",
+          "claude-opus-5-5",
+          "claude-fable-5-1"
+        ],
+        "arena cross-judge pool": [
+          "gpt-6-astra",
+          "gpt-6-sol",
+          "gpt-6-luna",
+          "claude-opus-5-5",
+          "claude-fable-5-1"
+        ],
+        "swarm workers": [
+          "gpt-6-luna"
+        ],
+        "architect runners": [
+          "gpt-6-astra",
+          "gpt-6-sol",
+          "gpt-6-luna",
+          "claude-opus-5-5",
+          "claude-fable-5-1"
+        ],
+        "interrogate reviewers": [
+          "gpt-6-astra",
+          "gpt-6-sol",
+          "gpt-6-luna",
+          "claude-opus-5-5",
+          "claude-fable-5-1"
+        ]
+      },
+      "features": {
+        "multi_agent": true
+      }
+    },
+    "cursor": {
+      "roles": {
+        "feature, refactoring": [
+          "gpt-5.6-sol-high"
+        ],
+        "bug-fix": [
+          "gpt-5.6-sol-high"
+        ],
+        "perf-issue": [
+          "gpt-5.6-sol-high"
+        ],
+        "hillclimb": [
+          "gpt-5.6-sol-high"
+        ],
+        "judgment and prose": [
+          "claude-fable-5-1-thinking-high"
+        ],
+        "hardest tasks": [
+          "claude-fable-5-1-thinking-high"
+        ],
+        "how explorer": [
+          "gpt-5.6-sol-high"
+        ],
+        "how explainer": [
+          "claude-fable-5-1-thinking-high"
+        ],
+        "how critics": [
+          "claude-fable-5-1-thinking-high",
+          "gpt-5.6-sol-high",
+          "claude-opus-5-thinking-high"
+        ],
+        "why investigators": [
+          "gpt-5.6-sol-high"
+        ],
+        "why synthesizer": [
+          "claude-fable-5-1-thinking-high"
+        ],
+        "reflect tooling": [
+          "gpt-5.6-sol-high"
+        ],
+        "reflect judgment, divergent, synthesizer": [
+          "claude-fable-5-1-thinking-high"
+        ],
+        "arena runners": [
+          "claude-fable-5-1-thinking-high",
+          "gpt-5.6-sol-high",
+          "claude-opus-5-thinking-high"
+        ],
+        "arena cross-judge pool": [
+          "claude-fable-5-1-thinking-high",
+          "gpt-5.6-sol-high",
+          "claude-opus-5-thinking-high"
+        ],
+        "swarm workers": [
+          "gpt-5.6-sol-high"
+        ],
+        "architect runners": [
+          "claude-fable-5-1-thinking-high",
+          "gpt-5.6-sol-high",
+          "claude-opus-5-thinking-high"
+        ],
+        "interrogate reviewers": [
+          "claude-fable-5-1-thinking-high",
+          "gpt-5.6-sol-high",
+          "claude-opus-5-thinking-high"
+        ]
+      }
+    },
+    "claude": {
+      "model": "fable[1m]",
+      "reasoning_effort": "xhigh",
+      "always_thinking_enabled": true,
+      "roles": {
+        "feature, refactoring": [
+          "sonnet"
+        ],
+        "bug-fix": [
+          "opus"
+        ],
+        "perf-issue": [
+          "opus"
+        ],
+        "hillclimb": [
+          "opus"
+        ],
+        "judgment and prose": [
+          "fable"
+        ],
+        "hardest tasks": [
+          "opus"
+        ],
+        "how explorer": [
+          "sonnet"
+        ],
+        "how explainer": [
+          "fable"
+        ],
+        "how critics": [
+          "fable",
+          "opus",
+          "sonnet",
+          "astra"
+        ],
+        "why investigators": [
+          "sonnet"
+        ],
+        "why synthesizer": [
+          "fable"
+        ],
+        "reflect tooling": [
+          "sonnet"
+        ],
+        "reflect judgment, divergent, synthesizer": [
+          "fable"
+        ],
+        "arena runners": [
+          "fable",
+          "opus",
+          "sonnet",
+          "astra"
+        ],
+        "arena cross-judge pool": [
+          "opus",
+          "fable",
+          "sonnet",
+          "astra"
+        ],
+        "swarm workers": [
+          "sonnet"
+        ],
+        "architect runners": [
+          "fable",
+          "opus",
+          "sonnet",
+          "astra"
+        ],
+        "interrogate reviewers": [
+          "fable",
+          "opus",
+          "sonnet",
+          "astra"
+        ]
+      }
+    }
+  },
+  "routes": {
+    "claude-opus-5-5": "claude",
+    "claude-fable-5-1": "claude",
+    "astra": "codex"
+  },
+  "aliases": {
+    "claude": {
+      "astra": {
+        "backend": "codex",
+        "model": "gpt-6-astra"
+      }
+    }
+  },
+  "classifier": {
+    "default_host": "codex",
+    "claude_context_threshold": 250000,
+    "forced_effort": "high",
+    "effort_levels": [
+      "low",
+      "high",
+      "xhigh"
+    ],
+    "quota_used_percent": 0
+  },
+  "max_parallel_agents": 4,
+  "tools": {
+    "codex": "codex",
+    "claude": "claude",
+    "aws": "aws",
+    "twg": "twg"
+  },
+  "connections": {
+    "context_service": {
+      "enabled": false,
+      "url": "",
+      "token_env": "CONTEXT_SERVICE_TOKEN"
+    },
+    "assistant_service": {
+      "enabled": false,
+      "url": "",
+      "token_env": "ASSISTANT_SERVICE_TOKEN"
+    }
+  },
+  "independent_review": {
+    "host": "claude",
+    "model": "claude-opus-5-5",
+    "applies_to": "codex"
+  }
+}

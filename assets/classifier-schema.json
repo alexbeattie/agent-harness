@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["model", "effort", "brevity", "reason"],
+  "properties": {
+    "model": {"type": "string", "enum": ["codex", "claude"]},
+    "effort": {"type": "string", "enum": ["low", "high", "xhigh"]},
+    "brevity": {"type": "boolean"},
+    "reason": {"type": "string", "maxLength": 200}
+  }
+}

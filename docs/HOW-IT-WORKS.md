@@ -2,7 +2,7 @@
 
 This document is generated from the maintained configuration, skill manifest and runtime files.
 
-The source of truth is this repository. The installer generates files for each user and records their hashes so a rerun can detect local edits.
+The source of truth is this repository. The installer generates files for each selected agent and records their hashes so a rerun can detect local edits. `-Agents` accepts cursor, codex, claude, or all (the default); repeatable `--agent` does the same in Python. A later selected install preserves files and ownership for unselected agents.
 
 ## Task flow
 
@@ -25,7 +25,7 @@ haws and htwg classify operations separately from the task classifier. Known rea
 | Location under your home folder | Purpose |
 |---|---|
 | .agents/skills | One shared installed set discovered by Cursor and Codex. |
-| .cursor/rules/agent-harness.mdc | Cursor model roles and external write rules. |
+| .agent-harness/cursor-user-rules.txt | Cursor model roles and external write rules to copy into Customize > Rules > User Rules. Generation alone does not activate them. |
 | .codex/agent-harness.config.toml | Named Codex profile used by harness codex. |
 | .agent-harness/claude-settings.json | Claude model and permission settings used by the wrapper. |
 | .agent-harness/claude-plugin | Claude copies of the shared skills and agent instructions. |
@@ -57,7 +57,7 @@ config/harness.json contains every maintained model and reasoning setting. It ha
 | tools | Executable names or paths for the local programs. |
 | connections | Disabled optional service endpoints and names of per-user token environment variables. |
 
-Model support and account entitlement can differ by host. A configured name is not evidence that an account can use it. check.ps1 distinguishes tested values from checks that still need the host UI or an authenticated probe.
+Model support and account entitlement can differ by host. A configured name is not evidence that an account can use it. check.ps1 checks selected host tools and sign-in, leaves model availability pending unless -ProbeModels is passed, and requires a manual Cursor model check. AWS and TWG installation and readiness checks run only with -IncludeServices. Cross-provider roles and automatic Codex classification remain pending when their other host is unselected.
 
 ### codex settings
 
@@ -309,10 +309,10 @@ These hashes tie this generated reference to the code files that implement the b
 
 | File | SHA-256 |
 |---|---|
-| [checks.py](../agent_harness/checks.py) | `b583d5d7832d4950e633ec3ea30aabfa503cca86049e44ebd958633e4613e746` |
+| [checks.py](../agent_harness/checks.py) | `18d14f6e7f2fe82ca32fe88dcc6adcda1425aace3d397be33e32d6dc10b9f296` |
 | [config.py](../agent_harness/config.py) | `b3b8390cc1b36062247692b93937fe3af8fd2361fa3d417805e48728fbd581a3` |
 | [dispatch.py](../agent_harness/dispatch.py) | `fc0d5f32e63b96f2acb8aff24a15eabe7e6680e539bdbba5947f9c2964144386` |
-| [generation.py](../agent_harness/generation.py) | `19a6b03650732535c814ca752aa9b99b12a5b872d2a1c2d9eb4be0fde66cedc8` |
+| [generation.py](../agent_harness/generation.py) | `7cff09bd42d473097c4ee11f5a8e25ef082942596bac94dec103d6b41b683f8e` |
 | [guard.py](../agent_harness/guard.py) | `2906fa34cd5b037e0c09dd30a6d32fc1b8db3afcff3b191cd32f5d7677e3d3f7` |
 | [model_catalog.py](../agent_harness/model_catalog.py) | `09045818cdfa71010299326cef365e2830046e68d10500b44c100b995afdf6db` |
 | [process.py](../agent_harness/process.py) | `4485ddecfbf3df97337e7a0542e1ade9b1762a148fd16622d25d5b5aa21cf407` |

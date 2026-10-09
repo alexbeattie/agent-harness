@@ -18,9 +18,9 @@ With IT approval, run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`, kee
 
 ## A command is not found
 
-Quit Cursor completely and start it again; a new terminal tab inside a running Cursor keeps the old PATH.
+Close and reopen the terminal application. If it is hosted by an editor, quit and restart that editor too; a new tab can retain the old PATH.
 
-Rerun check.ps1 from the package folder so it can name the missing tool.
+Rerun check.ps1 from the package folder with the same -Agents selector used for installation. Omitting it checks all three agents.
 
 Keep the package in its installed location; if you moved it, rerun install.ps1 to update the wrapper path.
 
@@ -35,6 +35,12 @@ Compare that file with the source before changing it.
 Save local edits elsewhere, move the conflicting generated file out of the way, then rerun installation.
 
 Never delete an entire .cursor, .codex, .claude or .agents folder to fix one conflict.
+
+## An upgrade reports an obsolete Cursor rule
+
+Version 1.0.1 replaces the home-folder .cursor\rules\agent-harness.mdc template with .agent-harness\cursor-user-rules.txt. An older file is retained so local edits are not erased.
+
+Compare and preserve any edits in the old file. After importing the current template into Cursor User Rules, move only that obsolete .mdc file to a private backup outside the managed folders. Rerun installation and the selected check. Do not delete the surrounding rules folder.
 
 ## Cursor does not show a skill
 
@@ -104,10 +110,10 @@ Leave its template disabled until the service owner supplies the endpoint, token
 
 The package does not treat missing optional MCP access as proof that a service or ticket does not exist.
 
-## check.ps1 still says setup is incomplete
+## The check reports missing agents or pending checks
 
-Read the individual results; missing files or failed sign-ins need fixing.
+Read the individual results. Missing selected files, commands and failed selected CLI sign-ins need fixing. If you installed one agent, pass its -Agents selector to check.ps1 too.
 
-Cursor skill discovery and model availability remain manual checks, even after the automatic checks pass.
+Cursor discovery and account model availability remain manual checks. Model probes are pending until requested with -ProbeModels. AWS/TWG checks require -IncludeServices; cross-provider workflows need both agents.
 
 Complete and record WINDOWS-TEST.md for those items; rerunning the CLI cannot inspect Cursor's account UI.

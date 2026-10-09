@@ -1,42 +1,95 @@
 # Install on Windows 11
 
-Use your own Windows account and a normal PowerShell terminal.
+Use your own Windows account and a normal PowerShell terminal. You can run it standalone or inside Cursor, VS Code, another editor or an IDE.
 
-You need internet access, permission to install developer tools, and your own Cursor, OpenAI, Anthropic, Atlassian and AWS access.
-
-If your company blocks an installer or PowerShell policy, ask IT to approve it; do not disable company controls.
+The default install prepares Cursor, Codex CLI and Claude Code. You only need accounts for the agents and services you choose. If company policy blocks an installer, ask IT to approve it.
 
 ## Get the package
 
-Extract the ZIP into a permanent folder such as C:\Work\agent-harness.
+Extract the ZIP into a permanent folder such as `C:\Work\agent-harness`. Compare its checksum with `Get-FileHash .\<zip file name> -Algorithm SHA256` before extracting.
 
-If you received a checksum alongside the ZIP, compare it with `Get-FileHash .\<zip file name> -Algorithm SHA256` before extracting.
+Open PowerShell in the extracted folder containing install.ps1. Review the scripts, then use `Get-ChildItem -Recurse -File | Unblock-File` if Windows marked the trusted download as blocked.
 
-Open the extracted folder in Cursor and open a PowerShell terminal there.
+## Choose agents and install
 
-Review the scripts, then unblock the files you trust with `Get-ChildItem -Recurse -File | Unblock-File` if Windows marked the download as blocked.
+Run this command for all three:
 
-Run `powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1`.
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1
+```
 
-This changes execution policy for that process only; company policy can still prevent execution.
+Or select one:
 
-The harness, hx, haws and htwg commands run under your account's normal execution policy, which Windows leaves at Restricted on a new client account. If check.ps1 reports a blocking policy, run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once with IT approval; do not change the machine-wide policy.
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Agents cursor
+powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Agents codex
+powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Agents claude
+```
 
-The installer installs missing tools and generates the team skills and settings.
+Run only the line that matches your choice. From a PowerShell session whose policy permits the script, `& .\install.ps1 -Agents codex,claude` selects both CLIs.
 
-It does not sign in for you, request a token, or copy another user's accounts.
+Every install and check command has its own selection. Omitting `-Agents` means all three. A selected install preserves generated files for agents installed earlier; it does not uninstall them or overwrite their local edits. Adding another agent later uses the same installer.
 
-If it reports a file conflict, stop and follow TROUBLESHOOTING.md rather than overwriting the file.
+The installer installs Git, Python and the selected missing CLI agents. For Cursor, install the [desktop editor](https://cursor.com/downloads) yourself; the harness supplies its skills and rule template. AWS and TWG tool installation is optional under `-IncludeServices`.
 
-Quit Cursor completely and start it again after installation. A new terminal tab inside a running Cursor keeps the environment Cursor started with and does not see the updated PATH or newly installed tools.
+The process-scoped execution-policy override does not change machine policy. The harness, hx, haws and htwg commands run under your account's normal policy. If check.ps1 reports a blocking policy, use `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` with IT approval.
 
-## Sign in to each program
+The installer does not sign in or copy accounts. If it reports a conflict, follow [TROUBLESHOOTING.md](TROUBLESHOOTING.md) before changing the affected file.
 
-Sign in to Cursor through its account menu using your own account.
+Close and reopen the terminal application when installation finishes. If it runs inside an editor, quit and restart that editor. A new terminal tab in an already running application can retain its old PATH.
 
-Run `codex` and follow its sign-in flow, then exit when you reach its prompt.
+## Cursor
 
-Run `claude` and follow its sign-in flow using your own Anthropic account or your company's supported access method.
+Sign in to the Cursor desktop editor. Open your project and start a new Agent chat.
+
+Type `/repo-pstack-mode` and confirm the skill appears. Ask it to report the source path and Cursor model roles from host-routing.md without editing files. The installed skills live in `.agents\skills` under your home folder.
+
+Open `.agent-harness\cursor-user-rules.txt` under your home folder. Copy its contents into Cursor's **Customize > Rules > User Rules**. Preserve your existing rules. Review this copy again after changing model configuration and rerunning the installer.
+
+That generated file is a template. Cursor's filesystem `.cursor/rules` convention is project-scoped, so placing it under your home folder does not establish that it applies globally. The shared skill also carries the model mappings. See [Cursor rules](https://cursor.com/docs/rules) and [local skill discovery](https://cursor.com/docs/skills).
+
+Check the configured roles against models available in your Cursor account. Keep a role pending if its model is unavailable. Remote and cloud sessions need their own setup; this package configures the local Windows account.
+
+## Codex CLI
+
+Run `codex`, complete its sign-in flow with your own account, and exit when you reach its prompt.
+
+In your project folder, run `harness codex`, then enter `$repo-pstack-mode`.
+
+The wrapper selects the generated agent-harness CLI profile. A plain `codex` command may use your personal defaults. The profile does not configure the Codex desktop app or an IDE extension.
+
+## Claude Code
+
+Run `claude` and complete its sign-in flow with your own account or your organization's supported access method, then exit.
+
+In your project folder, run `harness claude`, then enter `/agent-harness:repo-pstack-mode`.
+
+The wrapper loads the generated settings and plugin for this Claude Code session. Confirm the namespaced skill appears in the slash menu. Plugin skills use the plugin prefix, as described in [Claude Code's skill documentation](https://code.claude.com/docs/en/skills).
+
+Claude Code can be your primary agent. It does not need a preceding Codex session. The Codex-backed `astra` role and automatic dispatch classification require Codex separately; workflows using those features remain pending until that dependency is ready.
+
+## Check the selected agents
+
+From the package folder, run `powershell -NoProfile -ExecutionPolicy Bypass -File .\check.ps1` for all three. Add `-Agents cursor`, `-Agents codex` or `-Agents claude` to check one.
+
+The check covers selected generated files, commands, CLI sign-ins, normal terminal execution policy and wrapper paths. Cursor's app, skill discovery, User Rules and account model access need manual verification.
+
+Add `-ProbeModels` to test the selected CLI agents' configured native models when you are ready. These probes can consume quota or incur charges. Unrequested probes and manual checks remain pending even when the automatic checks pass.
+
+Cross-provider panels and independent reviews need their configured second agent. An individual setup can start without it; a required review or panel must remain incomplete until its dependency is available. Models and required reviews are never silently substituted.
+
+Follow [WINDOWS-TEST.md](WINDOWS-TEST.md) and save results outside this repository.
+
+## Optional AWS and Atlassian access
+
+Install the service CLIs by rerunning the installer with the same agent selector and `-IncludeServices`. For example:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Agents codex -IncludeServices
+```
+
+After completing the sign-ins below, use `powershell -NoProfile -ExecutionPolicy Bypass -File .\check.ps1 -Agents codex -IncludeServices` to request service readiness checks too. Substitute your own selected agent, or omit `-Agents` for all three. Service access is not required to open an agent session.
+
 
 For a fresh TWG installation, select its encrypted credential storage before signing in:
 
@@ -62,8 +115,6 @@ TWG manages per-user OAuth and token storage; the harness does not put Atlassian
 
 OAuth is the currently supported Atlassian sign-in method, so a site, email and token are not copied into a shared config. The separate Bitbucket token comes from your own account.
 
-The inspected Mac executable contains Bun runtime markers; its original source language was not established, and that binary is not included.
-
 Use your own scoped Atlassian API token where required; Bitbucket app passwords are retired.
 
 Do not paste a token into a chat, task file, Git commit or this repository's configuration.
@@ -74,29 +125,10 @@ If your organization uses another AWS sign-in method, follow its instructions fo
 
 Set `$env:AWS_PROFILE = 'team-dev'` in the terminal before AWS work.
 
-To use that profile in future terminals, run `[Environment]::SetEnvironmentVariable('AWS_PROFILE', 'team-dev', 'User')`, then quit and restart Cursor.
+To use that profile in future terminals, run `[Environment]::SetEnvironmentVariable('AWS_PROFILE', 'team-dev', 'User')`, then close and reopen your terminal application or editor.
 
 Choose the profile name supplied by your team if it differs from this example.
 
-## Check the installation
-
-Run `powershell -NoProfile -ExecutionPolicy Bypass -File .\check.ps1` from the package folder. It reports the execution policy a normal terminal applies and whether harness, hx, haws and htwg resolve to this package.
-
-Resolve each missing tool, sign-in or incompatible setting shown.
-
-Cursor discovery and model access require the manual checks below; check.ps1 keeps them marked unverified and can return exit code 1 even when its automatic checks pass.
-
-Follow the WINDOWS-TEST.md checklist and save manual results in a private test record outside this repository.
-
-Run `powershell -NoProfile -ExecutionPolicy Bypass -File .\check.ps1 -ProbeModels` when you are ready for account model checks; probes can consume quota or incur charges.
-
-Open a new Cursor agent chat, type `/repo-pstack-mode`, and confirm that the skill appears.
-
-Ask it to report the source path and the Cursor swarm-worker model from host-routing.md without running tools or editing files.
-
-Check that model in Cursor's available models; a file-presence check alone does not verify that Cursor loaded it or that your account can use it.
-
-Use `harness codex` and `harness claude` for the configured terminal workflows.
 
 ## Optional service connections
 

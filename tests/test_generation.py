@@ -1,4 +1,6 @@
 import json
+import subprocess
+import sys
 import re
 import tempfile
 import unittest
@@ -86,3 +88,43 @@ class GenerationTests(unittest.TestCase):
         generate(self.root,self.home)
         plugin=json.loads((self.home/'.agent-harness/claude-plugin/.claude-plugin/plugin.json').read_text(encoding='utf-8'))
         self.assertEqual(plugin['version'],'9.8.7')
+
+    def test_selected_install_preserves_other_agent_files_and_ownership(self):
+        generate(self.root,self.home,agents=('cursor',))
+        cursor=self.home/'.agent-harness/cursor-user-rules.txt'
+        self.assertTrue(cursor.is_file())
+        self.assertTrue(cursor.read_text().startswith('# Agent harness'))
+        self.assertFalse((self.home/'.codex/agent-harness.config.toml').exists())
+        self.assertFalse((self.home/'.agent-harness/claude-plugin').exists())
+        cursor.write_text('personal edit')
+        generate(self.root,self.home,agents=('claude',))
+        self.assertEqual(cursor.read_text(),'personal edit')
+        state=json.loads((self.home/'.agent-harness/install-state.json').read_text())['files']
+        self.assertIn('.agent-harness/cursor-user-rules.txt',state)
+        self.assertIn('.agent-harness/claude-settings.json',state)
+        self.assertFalse((self.home/'.codex/agent-harness.config.toml').exists())
+        self.assertEqual(generate(self.root,self.home,check=True,agents=('claude',))['changed'],0)
+
+    def test_previous_cursor_project_rule_is_retained_for_manual_review(self):
+        generate(self.root,self.home,agents=('cursor',))
+        legacy=self.home/'.cursor/rules/agent-harness.mdc'
+        legacy.parent.mkdir(parents=True)
+        legacy.write_text('edited old rule')
+        state=self.home/'.agent-harness/install-state.json'
+        payload=json.loads(state.read_text())
+        payload['files']['.cursor/rules/agent-harness.mdc']='old-package-hash'
+        state.write_text(json.dumps(payload))
+        result=generate(self.root,self.home,agents=('cursor',))
+        self.assertEqual(result['retained_obsolete'],['.cursor/rules/agent-harness.mdc'])
+        self.assertEqual(legacy.read_text(),'edited old rule')
+
+    def test_all_cannot_be_mixed_with_named_agents(self):
+        with self.assertRaisesRegex(GenerationError,'all'):
+            generate(self.root,self.home,agents=('all','codex'))
+
+    def test_cli_rejects_mixed_all_and_named_agents(self):
+        result=subprocess.run([sys.executable,str(ROOT/'harness.py'),'generate','--home',str(self.home),
+                               '--agent','all','--agent','codex'],capture_output=True,text=True)
+        self.assertEqual(result.returncode,2)
+        self.assertIn('Do not mix all',result.stderr)
+        self.assertFalse((self.home/'.agent-harness/install-state.json').exists())

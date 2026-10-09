@@ -15,9 +15,12 @@ def main(argv: list[str] | None = None) -> int:
     generate=sub.add_parser('generate',help='Install managed skills and settings without changing personal files.')
     generate.add_argument('--home',type=Path,default=Path.home())
     generate.add_argument('--check',action='store_true')
+    generate.add_argument('--agent',action='append',choices=['all','cursor','codex','claude'],default=[])
     check=sub.add_parser('check',help='Check installation and explain missing setup.')
     check.add_argument('--home',type=Path,default=Path.home())
     check.add_argument('--probe-models',action='store_true',help='Run account checks; model probes may consume quota or cost money.')
+    check.add_argument('--check-services',action='store_true',help='Check optional AWS and TWG access.')
+    check.add_argument('--agent',action='append',choices=['all','cursor','codex','claude'],default=[])
     dispatch=sub.add_parser('dispatch',help='Classify a task or hand it to a configured model.')
     task=dispatch.add_mutually_exclusive_group(required=True)
     task.add_argument('--task')
@@ -41,12 +44,12 @@ def main(argv: list[str] | None = None) -> int:
         config=load_config(ROOT)
         if args.command=='generate':
             from agent_harness.generation import generate
-            result=generate(ROOT,args.home,args.check)
+            result=generate(ROOT,args.home,args.check,agents=args.agent)
             print(json.dumps(result,indent=2))
             return 1 if args.check and result['changed'] else 0
         if args.command=='check':
             from agent_harness.checks import run_checks
-            return run_checks(ROOT,args.home,args.probe_models)
+            return run_checks(ROOT,args.home,args.probe_models,agents=args.agent,check_services=args.check_services)
         if args.command=='dispatch':
             from agent_harness.dispatch import run_dispatch
             text=args.task_file.read_text(encoding='utf-8-sig') if args.task_file else args.task

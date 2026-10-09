@@ -12,7 +12,7 @@ When to use it: Design tradeoffs before implementation.
 
 Example: `Use architect to sketch module boundaries before a refactor.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:architect` through the generated team plugin.
 
 Limits and requirements: The active repository owns implementation gates.
 
@@ -28,7 +28,7 @@ When to use it: Several independent candidate approaches are useful.
 
 Example: `Use arena to compare two implementations against one rubric.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:arena` through the generated team plugin.
 
 Limits and requirements: Candidate writers need isolated paths.
 
@@ -44,7 +44,7 @@ When to use it: Candidate contains extra code or abstraction.
 
 Example: `Use deslop after behavior is verified.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:deslop` through the generated team plugin.
 
 Limits and requirements: Rerun affected behavior checks.
 
@@ -58,7 +58,7 @@ When to use it: Ambiguous task with multiple unknowns.
 
 Example: `Use figure-it-out to run the shortest discriminating experiment.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:figure-it-out` through the generated team plugin.
 
 Limits and requirements: External writes retain their approval gate.
 
@@ -74,7 +74,7 @@ When to use it: Before branch movement in a single-checkout repository.
 
 Example: `Use git-safe-state-auto to inspect status and base.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:git-safe-state-auto` through the generated team plugin.
 
 Limits and requirements: Hand off if multiple worktrees exist.
 
@@ -90,7 +90,7 @@ When to use it: Question about current code flow.
 
 Example: `Use how to trace an API request to its output.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:how` through the generated team plugin.
 
 Limits and requirements: Reading code alone does not prove runtime behavior.
 
@@ -106,7 +106,7 @@ When to use it: Candidate needs independent review.
 
 Example: `Use interrogate for read-only review of a frozen diff.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:interrogate` through the generated team plugin.
 
 Limits and requirements: Reviewer consensus is not proof.
 
@@ -122,7 +122,7 @@ When to use it: Review changed code comments.
 
 Example: `Use no-comments on the current diff.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:no-comments` through the generated team plugin.
 
 Limits and requirements: Keep comments that explain real invariants.
 
@@ -138,7 +138,7 @@ When to use it: Bounded engineering task needing a verified outcome.
 
 Example: `Use poteto-mode to implement a bug fix in verifiable units.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:poteto-mode` through the generated team plugin.
 
 Limits and requirements: Do not substitute an unavailable role model.
 
@@ -154,7 +154,7 @@ When to use it: A decision or review calls for the attack the premise principle.
 
 Example: `Read principle-attack-the-premise while reviewing a relevant change.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:principle-attack-the-premise` through the generated team plugin.
 
 Limits and requirements: Apply only where the task trigger fits; repository rules remain authoritative.
 
@@ -170,7 +170,7 @@ When to use it: A decision or review calls for the boundary discipline principle
 
 Example: `Read principle-boundary-discipline while reviewing a relevant change.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:principle-boundary-discipline` through the generated team plugin.
 
 Limits and requirements: Apply only where the task trigger fits; repository rules remain authoritative.
 
@@ -184,7 +184,7 @@ When to use it: A decision or review calls for the build the lever principle.
 
 Example: `Read principle-build-the-lever while reviewing a relevant change.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:principle-build-the-lever` through the generated team plugin.
 
 Limits and requirements: Apply only where the task trigger fits; repository rules remain authoritative.
 
@@ -200,7 +200,7 @@ When to use it: A decision or review calls for the encode lessons in structure p
 
 Example: `Read principle-encode-lessons-in-structure while reviewing a relevant change.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:principle-encode-lessons-in-structure` through the generated team plugin.
 
 Limits and requirements: Apply only where the task trigger fits; repository rules remain authoritative.
 
@@ -214,7 +214,7 @@ When to use it: A decision or review calls for the exhaust the design space prin
 
 Example: `Read principle-exhaust-the-design-space while reviewing a relevant change.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:principle-exhaust-the-design-space` through the generated team plugin.
 
 Limits and requirements: Apply only where the task trigger fits; repository rules remain authoritative.
 
@@ -228,7 +228,7 @@ When to use it: A decision or review calls for the experience first principle.
 
 Example: `Read principle-experience-first while reviewing a relevant change.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:principle-experience-first` through the generated team plugin.
 
 Limits and requirements: Apply only where the task trigger fits; repository rules remain authoritative.
 
@@ -242,7 +242,7 @@ When to use it: A decision or review calls for the explain the number principle.
 
 Example: `Read principle-explain-the-number while reviewing a relevant change.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:principle-explain-the-number` through the generated team plugin.
 
 Limits and requirements: Apply only where the task trigger fits; repository rules remain authoritative.
 
@@ -258,7 +258,7 @@ When to use it: A decision or review calls for the fix root causes principle.
 
 Example: `Read principle-fix-root-causes while reviewing a relevant change.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:principle-fix-root-causes` through the generated team plugin.
 
 Limits and requirements: Apply only where the task trigger fits; repository rules remain authoritative.
 
@@ -272,7 +272,7 @@ When to use it: A decision or review calls for the foundational thinking princip
 
 Example: `Read principle-foundational-thinking while reviewing a relevant change.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:principle-foundational-thinking` through the generated team plugin.
 
 Limits and requirements: Apply only where the task trigger fits; repository rules remain authoritative.
 
@@ -286,7 +286,7 @@ When to use it: A decision or review calls for the guard the context window prin
 
 Example: `Read principle-guard-the-context-window while reviewing a relevant change.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:principle-guard-the-context-window` through the generated team plugin.
 
 Limits and requirements: Apply only where the task trigger fits; repository rules remain authoritative.
 
@@ -300,7 +300,7 @@ When to use it: A decision or review calls for the laziness protocol principle.
 
 Example: `Read principle-laziness-protocol while reviewing a relevant change.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:principle-laziness-protocol` through the generated team plugin.
 
 Limits and requirements: Apply only where the task trigger fits; repository rules remain authoritative.
 
@@ -314,7 +314,7 @@ When to use it: A decision or review calls for the make operations idempotent pr
 
 Example: `Read principle-make-operations-idempotent while reviewing a relevant change.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:principle-make-operations-idempotent` through the generated team plugin.
 
 Limits and requirements: Apply only where the task trigger fits; repository rules remain authoritative.
 
@@ -328,7 +328,7 @@ When to use it: A decision or review calls for the migrate callers then delete l
 
 Example: `Read principle-migrate-callers-then-delete-legacy-apis while reviewing a relevant change.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:principle-migrate-callers-then-delete-legacy-apis` through the generated team plugin.
 
 Limits and requirements: Apply only where the task trigger fits; repository rules remain authoritative.
 
@@ -342,7 +342,7 @@ When to use it: A decision or review calls for the minimize reader load principl
 
 Example: `Read principle-minimize-reader-load while reviewing a relevant change.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:principle-minimize-reader-load` through the generated team plugin.
 
 Limits and requirements: Apply only where the task trigger fits; repository rules remain authoritative.
 
@@ -358,7 +358,7 @@ When to use it: A decision or review calls for the model the domain principle.
 
 Example: `Read principle-model-the-domain while reviewing a relevant change.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:principle-model-the-domain` through the generated team plugin.
 
 Limits and requirements: Apply only where the task trigger fits; repository rules remain authoritative.
 
@@ -372,7 +372,7 @@ When to use it: A decision or review calls for the never block on the human prin
 
 Example: `Read principle-never-block-on-the-human while reviewing a relevant change.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:principle-never-block-on-the-human` through the generated team plugin.
 
 Limits and requirements: Apply only where the task trigger fits; repository rules remain authoritative.
 
@@ -386,7 +386,7 @@ When to use it: A decision or review calls for the outcome oriented execution pr
 
 Example: `Read principle-outcome-oriented-execution while reviewing a relevant change.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:principle-outcome-oriented-execution` through the generated team plugin.
 
 Limits and requirements: Apply only where the task trigger fits; repository rules remain authoritative.
 
@@ -400,7 +400,7 @@ When to use it: A decision or review calls for the prove it works principle.
 
 Example: `Read principle-prove-it-works while reviewing a relevant change.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:principle-prove-it-works` through the generated team plugin.
 
 Limits and requirements: Apply only where the task trigger fits; repository rules remain authoritative.
 
@@ -414,7 +414,7 @@ When to use it: A decision or review calls for the redesign from first principle
 
 Example: `Read principle-redesign-from-first-principles while reviewing a relevant change.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:principle-redesign-from-first-principles` through the generated team plugin.
 
 Limits and requirements: Apply only where the task trigger fits; repository rules remain authoritative.
 
@@ -428,7 +428,7 @@ When to use it: A decision or review calls for the separate before serializing s
 
 Example: `Read principle-separate-before-serializing-shared-state while reviewing a relevant change.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:principle-separate-before-serializing-shared-state` through the generated team plugin.
 
 Limits and requirements: Apply only where the task trigger fits; repository rules remain authoritative.
 
@@ -442,7 +442,7 @@ When to use it: A decision or review calls for the sequence verifiable units pri
 
 Example: `Read principle-sequence-verifiable-units while reviewing a relevant change.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:principle-sequence-verifiable-units` through the generated team plugin.
 
 Limits and requirements: Apply only where the task trigger fits; repository rules remain authoritative.
 
@@ -456,7 +456,7 @@ When to use it: A decision or review calls for the subtract before you add princ
 
 Example: `Read principle-subtract-before-you-add while reviewing a relevant change.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:principle-subtract-before-you-add` through the generated team plugin.
 
 Limits and requirements: Apply only where the task trigger fits; repository rules remain authoritative.
 
@@ -470,7 +470,7 @@ When to use it: A decision or review calls for the test behavior not implementat
 
 Example: `Read principle-test-behavior-not-implementation while reviewing a relevant change.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:principle-test-behavior-not-implementation` through the generated team plugin.
 
 Limits and requirements: Apply only where the task trigger fits; repository rules remain authoritative.
 
@@ -484,7 +484,7 @@ When to use it: A decision or review calls for the type system discipline princi
 
 Example: `Read principle-type-system-discipline while reviewing a relevant change.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:principle-type-system-discipline` through the generated team plugin.
 
 Limits and requirements: Apply only where the task trigger fits; repository rules remain authoritative.
 
@@ -498,7 +498,7 @@ When to use it: Review of a completed agent run.
 
 Example: `Use reflect on the current task digest.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:reflect` through the generated team plugin.
 
 Limits and requirements: Do not scan unrelated chat histories.
 
@@ -514,7 +514,7 @@ When to use it: Work can be partitioned safely.
 
 Example: `Use swarm to assign disjoint modules to workers.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:swarm` through the generated team plugin.
 
 Limits and requirements: One owner integrates and verifies.
 
@@ -530,7 +530,7 @@ When to use it: Behavior change or bug fix where tests can reproduce it.
 
 Example: `Use tdd to capture the failing input before a fix.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:tdd` through the generated team plugin.
 
 Limits and requirements: Do not invent a failing-test phase.
 
@@ -546,7 +546,7 @@ When to use it: Repository engineering task.
 
 Example: `Use repo-pstack-mode for a repository code change.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:repo-pstack-mode` through the generated team plugin.
 
 Limits and requirements: Repository delivery rules and human approval still apply.
 
@@ -562,7 +562,7 @@ When to use it: Writing a how-to, reference, tutorial, or explanation.
 
 Example: `Use technical-writing for a setup guide.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:technical-writing` through the generated team plugin.
 
 Limits and requirements: Do not claim tests that did not run.
 
@@ -576,7 +576,7 @@ When to use it: repository source reads or approved writes.
 
 Example: `Use htwg to read a live PR.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:twg` through the generated team plugin.
 
 Limits and requirements: Official CLI and auth are per user; wrapper approval is cooperative.
 
@@ -590,7 +590,7 @@ When to use it: Ticket and Bitbucket PR delivery check.
 
 Example: `Use twg-engineering-work to verify PR head and CI.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:twg-engineering-work` through the generated team plugin.
 
 Limits and requirements: Keep merge, deployment, QA, and acceptance distinct.
 
@@ -606,7 +606,7 @@ When to use it: Jira issue search, read, or approved update.
 
 Example: `Use twg-jira to check duplicates before a new issue.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:twg-jira` through the generated team plugin.
 
 Limits and requirements: No ticket write without explicit human yes via htwg.
 
@@ -622,7 +622,7 @@ When to use it: Technical prose needs a concise final pass.
 
 Example: `Use unslop on a PR description.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:unslop` through the generated team plugin.
 
 Limits and requirements: Preserve material limitations and evidence.
 
@@ -636,7 +636,7 @@ When to use it: Question about historical rationale.
 
 Example: `Use why to trace a design choice through commits and ticket discussion.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:why` through the generated team plugin.
 
 Limits and requirements: Missing history stays unknown.
 
@@ -652,7 +652,7 @@ When to use it: Before substantive work in a shared Git repository.
 
 Example: `Use worktree-level-set to select a safe task checkout.`
 
-Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.
+Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:worktree-level-set` through the generated team plugin.
 
 Limits and requirements: Do not remove another writer’s files.
 

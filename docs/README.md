@@ -1,31 +1,24 @@
-# Agent setup
+# Agent harness
 
-This package installs shared development instructions for Cursor, Codex and Claude Code on Windows 11.
+Use the same maintained workflows in Cursor, Codex CLI and Claude Code on Windows 11. Choose one or install all three.
 
-Cursor is the editor and has its own agent chat.
+Codex and Claude Code can run from a standalone PowerShell terminal or an editor's terminal. The launch commands configure those CLI sessions; they do not configure separate desktop apps or IDE extensions.
 
-Codex and Claude Code are separate programs that you run in Cursor's PowerShell terminal.
+Start with [WINDOWS-QUICK-START.md](WINDOWS-QUICK-START.md), then [INSTALL.md](INSTALL.md) for account setup and [USING.md](USING.md) for your first task.
 
-The package includes the Team planning and review workflows, their required supporting skills, a task dispatcher, and wrappers that ask before AWS or TWG writes.
+The package includes planning and review skills, configured models for each agent, a task dispatcher and wrappers that ask before AWS or TWG writes. Every person uses their own accounts.
 
-Each person signs in with their own accounts.
+| Reference | What it covers |
+|---|---|
+| [CONTENTS.md](CONTENTS.md) | Files included in the release |
+| [SKILLS.md](SKILLS.md) | Included skills and examples |
+| [HOW-IT-WORKS.md](HOW-IT-WORKS.md) | Generated files and model settings |
+| [CONFIG-CHANGES.md](CONFIG-CHANGES.md) | Settings and preserved personal configuration |
+| [WINDOWS-CHANGES.md](WINDOWS-CHANGES.md) | Windows portability changes |
+| [TROUBLESHOOTING.md](TROUBLESHOOTING.md) | Installation and runtime failures |
+| [OWNERS.md](OWNERS.md) | Maintenance and release procedure |
+| [EXCLUSIONS.md](EXCLUSIONS.md) | Excluded files and reasons |
+| [WINDOWS-TEST.md](WINDOWS-TEST.md) | Acceptance on a fresh Windows account |
+| [VERIFICATION.md](VERIFICATION.md) | Completed checks and open acceptance items |
 
-Start with [INSTALL.md](INSTALL.md), then follow the first task in [USING.md](USING.md).
-
-[CONTENTS.md](CONTENTS.md) shows the package tree; [EXCLUSIONS.md](EXCLUSIONS.md) lists excluded files and reasons.
-
-[WINDOWS-CHANGES.md](WINDOWS-CHANGES.md) and [CONFIG-CHANGES.md](CONFIG-CHANGES.md) explain the portability and settings changes.
-
-[SKILLS.md](SKILLS.md) lists every included skill and gives an example for each.
-
-[HOW-IT-WORKS.md](HOW-IT-WORKS.md) explains the files and settings.
-
-[TROUBLESHOOTING.md](TROUBLESHOOTING.md) gives fixes for common failures.
-
-[OWNERS.md](OWNERS.md) explains how to maintain and release the package.
-
-Run [WINDOWS-TEST.md](WINDOWS-TEST.md) under a new Windows user account before accepting this setup for your account.
-
-The local verification record is [VERIFICATION.md](VERIFICATION.md); an automated check on a Mac does not establish that Cursor loads the skills on Windows.
-
-No personal credentials, session history or customer examples are included.
+No personal credentials, session history or customer examples are included. Local package checks do not establish native Windows acceptance.

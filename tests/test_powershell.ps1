@@ -110,6 +110,45 @@ exit `$LASTEXITCODE
     if ([Environment]::GetEnvironmentVariable('Path', 'User') -ne $pathBefore) {
         throw 'Fixture install changed live user environment settings.'
     }
+    $selectedHome = Join-Path $temp 'Codex only'
+    & (Join-Path $root 'install.ps1') -SkipTools -TargetHome $selectedHome -Agents codex
+    if ($global:AgentHarnessExitCode -ne 0) { throw 'Codex-only fixture install failed.' }
+    if (-not (Test-Path -LiteralPath (Join-Path $selectedHome '.codex/agent-harness.config.toml'))) {
+        throw 'Codex-only fixture lacks its profile.'
+    }
+    if (Test-Path -LiteralPath (Join-Path $selectedHome '.agent-harness/claude-plugin')) {
+        throw 'Codex-only fixture installed the Claude plugin.'
+    }
+    if (Test-Path -LiteralPath (Join-Path $selectedHome '.agent-harness/cursor-user-rules.txt')) {
+        throw 'Codex-only fixture installed Cursor User Rules.'
+    }
+    $mixedCaseHome = Join-Path $temp 'Mixed case Codex'
+    & (Join-Path $root 'install.ps1') -SkipTools -TargetHome $mixedCaseHome -Agents Codex
+    if ($global:AgentHarnessExitCode -ne 0 -or -not (Test-Path -LiteralPath (Join-Path $mixedCaseHome '.codex/agent-harness.config.toml'))) {
+        throw 'Mixed-case Codex selection did not install Codex files.'
+    }
+    $upperHome = Join-Path $temp 'Uppercase all'
+    & (Join-Path $root 'install.ps1') -SkipTools -TargetHome $upperHome -Agents ALL
+    if ($global:AgentHarnessExitCode -ne 0 -or -not (Test-Path -LiteralPath (Join-Path $upperHome '.agent-harness/claude-plugin'))) {
+        throw 'Uppercase ALL did not select every agent.'
+    }
+    $emptyHome = Join-Path $temp 'Empty selection'
+    try {
+        & (Join-Path $root 'install.ps1') -SkipTools -TargetHome $emptyHome -Agents @()
+        throw 'Empty agent selection was accepted.'
+    } catch {
+        if ($_.Exception.Message -eq 'Empty agent selection was accepted.') { throw }
+    }
+    if (Test-Path -LiteralPath (Join-Path $emptyHome '.agent-harness/install-state.json')) {
+        throw 'Empty agent selection changed fixture files.'
+    }
+    $checkOutput = & $pwshPath -NoProfile -File (Join-Path $root 'check.ps1') -TargetHome $selectedHome -Agents Codex 2>&1 | Out-String
+    if ($checkOutput -notmatch 'Cross-provider Claude review and routed models: Pending') {
+        throw 'check.ps1 did not forward the selected Codex agent.'
+    }
+    if ($checkOutput -match 'Cursor model status:') {
+        throw 'Codex-only check evaluated Cursor model readiness.'
+    }
 } finally {
     Remove-Item -LiteralPath $temp -Recurse -Force -ErrorAction SilentlyContinue
     Remove-Item Env:HARNESS_TEST_ARGUMENTS -ErrorAction SilentlyContinue

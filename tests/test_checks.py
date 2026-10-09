@@ -1,5 +1,6 @@
 import io
 import json
+import sys
 import unittest
 from contextlib import redirect_stdout
 from pathlib import Path
@@ -20,11 +21,64 @@ class CheckTests(unittest.TestCase):
         self.assertIn('Managed setup: Installed and matches this package.', output)
         self.assertIn('Codex sign-in: Not verified', output)
         self.assertIn('Claude sign-in: Not verified', output)
-        self.assertIn('AWS sign-in: Not verified', output)
-        self.assertIn('TWG sign-in: Not verified', output)
+        self.assertIn('AWS/TWG services: Optional', output)
         self.assertIn('Cursor model status: Manual check required', output)
         self.assertNotIn('SECRET_TOKEN', output)
         self.assertNotIn('Setup checks passed.', output)
+
+    def test_codex_only_check_does_not_require_other_hosts_or_services(self):
+        output = self._run_main_check(auth_ok=True, agents=('codex',), expected_modern_code=0)
+        self.assertIn('Codex sign-in: Signed in', output)
+        self.assertNotIn('Claude sign-in:', output)
+        self.assertNotIn('Cursor model status:', output)
+        self.assertNotIn('AWS sign-in:', output)
+        self.assertIn('Cross-provider Claude review and routed models: Pending', output)
+        self.assertIn('Model availability: Configured values only', output)
+
+    def test_cursor_only_skips_every_cli_and_keeps_manual_work_pending(self):
+        output = io.StringIO()
+        def native(name):
+            raise AssertionError(f'unselected native tool checked: {name}')
+        with patch('agent_harness.checks._native_tool', side_effect=native), \
+             patch('agent_harness.checks.shutil.which', side_effect=lambda name: '/bin/git' if name == 'git' else None), \
+             patch('agent_harness.checks._run', return_value=SimpleNamespace(returncode=0)), \
+             patch('agent_harness.checks.generate', return_value={'changed': 0}), \
+             redirect_stdout(output):
+            code = run_checks(ROOT, Path('/tmp/fixture-home'), agents=('cursor',))
+        self.assertEqual(code, 0 if sys.version_info >= (3, 11) else 1)
+        self.assertIn('Cursor model status: Manual check required', output.getvalue())
+        self.assertNotIn('Codex sign-in:', output.getvalue())
+
+    def test_requested_optional_services_name_the_install_switch(self):
+        output = io.StringIO()
+        with patch('agent_harness.checks._native_tool', return_value=None), \
+             patch('agent_harness.checks.shutil.which', side_effect=lambda name: '/bin/git' if name == 'git' else None), \
+             patch('agent_harness.checks._run', return_value=SimpleNamespace(returncode=0)), \
+             patch('agent_harness.checks.generate', return_value={'changed': 0}), \
+             redirect_stdout(output):
+            code = run_checks(ROOT, Path('/tmp/fixture-home'), agents=('cursor',), check_services=True)
+        self.assertEqual(code, 1)
+        self.assertIn('AWS CLI: Missing; install it with `.\\install.ps1 -Agents cursor -IncludeServices`.', output.getvalue())
+        self.assertIn('TWG CLI: Missing; install it with `.\\install.ps1 -Agents cursor -IncludeServices`.', output.getvalue())
+
+    def test_claude_only_skips_codex_and_services_and_fails_bad_sign_in(self):
+        def native(name):
+            self.assertEqual(name, 'claude')
+            return '/tools/claude'
+        for auth_ok in (True, False):
+            output = io.StringIO()
+            def command(args, **kwargs):
+                return SimpleNamespace(returncode=0 if args[0] != '/tools/claude' or auth_ok else 1)
+            with patch('agent_harness.checks._native_tool', side_effect=native), \
+                 patch('agent_harness.checks.shutil.which', side_effect=lambda name: '/bin/git' if name == 'git' else None), \
+                 patch('agent_harness.checks._run', side_effect=command), \
+                 patch('agent_harness.checks.generate', return_value={'changed': 0}), \
+                 redirect_stdout(output):
+                code = run_checks(ROOT, Path('/tmp/fixture-home'), agents=('claude',))
+            self.assertEqual(code, 0 if auth_ok and sys.version_info >= (3, 11) else 1)
+            self.assertIn('Claude sign-in: ' + ('Signed in' if auth_ok else 'Not verified'), output.getvalue())
+            self.assertIn('automatic classifier: Pending', output.getvalue())
+            self.assertNotIn('Codex CLI:', output.getvalue())
 
     def test_probe_routes_every_configured_model_without_fallback(self):
         config = load_config(ROOT)
@@ -33,7 +87,8 @@ class CheckTests(unittest.TestCase):
         with patch('agent_harness.checks._probe_codex_models', return_value={
                     'catalog_error': False, 'missing_models': [], 'effort_incompatible': []}) as codex_probe, \
              patch('agent_harness.checks._probe_claude_models', return_value={model: model for model in claude_expected}) as claude_probe:
-            output = self._run_main_check(auth_ok=True, probe=True, use_outer_probe_mocks=True)
+            output = self._run_main_check(auth_ok=True, probe=True, use_outer_probe_mocks=True,
+                                          expected_modern_code=0)
         codex_probe.assert_called_once_with('/tools/codex', codex_expected, 'ultra', 'gpt-6-astra')
         claude_probe.assert_called_once_with('/tools/claude', claude_expected, 'xhigh')
         self.assertIn(f'Verified {len(codex_expected)} configured model(s)', output)
@@ -130,7 +185,8 @@ class CheckTests(unittest.TestCase):
             self.assertFalse(_aws_ready('/tools/aws', 'dev'))
 
     def _run_main_check(self, auth_ok: bool, probe: bool = False,
-                        use_outer_probe_mocks: bool = False) -> str:
+                        use_outer_probe_mocks: bool = False, agents=None,
+                        expected_modern_code: int = 1) -> str:
         tools = {'git': '/bin/git', 'codex': '/tools/codex', 'claude': '/tools/claude',
                  'aws': '/tools/aws', 'twg': '/tools/twg'}
 
@@ -172,8 +228,8 @@ class CheckTests(unittest.TestCase):
              (patches[5] if len(patches) > 5 else __import__('contextlib').nullcontext()), \
              (patches[6] if len(patches) > 6 else __import__('contextlib').nullcontext()), \
              redirect_stdout(output):
-            result = run_checks(ROOT, Path('/tmp/fixture-home'), probe_models=probe)
-        self.assertEqual(result, 1)  # Cursor availability remains explicitly unverified.
+            result = run_checks(ROOT, Path('/tmp/fixture-home'), probe_models=probe, agents=agents)
+        self.assertEqual(result, expected_modern_code if sys.version_info >= (3, 11) else 1)
         return output.getvalue()
 
 

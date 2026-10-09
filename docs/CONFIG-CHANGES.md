@@ -10,7 +10,7 @@ The profile enables Codex's multi_agent feature, matching the source setup, so t
 
 Claude's main model, reasoning effort and thinking setting are retained in its generated settings file.
 
-Cursor's role mappings are generated into the team rule.
+Cursor's role mappings are generated into its shared skill and a User Rules template. Import the template body through Cursor's Customize > Rules > User Rules; preserve existing rules.
 
 The source files contain no account tokens, AWS profile contents or saved login state.
 
@@ -20,7 +20,7 @@ Codex is started with a named team profile; Claude receives explicit settings an
 
 Existing personal config.toml, settings.json, mcp.json and global instruction files are not replaced.
 
-the optional context and assistant services templates are disabled and have blank endpoints until each person obtains their own connection details.
+The optional context and assistant services templates are disabled and have blank endpoints until each person obtains their own connection details.
 
 The maximum concurrent agent count is set in max_parallel_agents; the generated instructions tell hosts to queue additional panel members.
 

@@ -10,15 +10,18 @@ from pathlib import Path
 
 from .config import load_config
 from .dispatch import observed_model_identity
-from .generation import GenerationError, generate
+from .generation import GenerationError, generate, selected_agents
 from .model_catalog import codex_model_pages as _codex_model_pages
 
 
-def run_checks(root: Path, target_home: Path, probe_models: bool = False) -> int:
+def run_checks(root: Path, target_home: Path, probe_models: bool = False,
+               agents: tuple[str, ...] | list[str] | None = None,
+               check_services: bool = False) -> int:
     """Print safe, plain-English status; never echo command output or secrets."""
     root, target_home = root.resolve(), target_home.expanduser().absolute()
     failures: list[str] = []
     config = load_config(root)
+    selected = selected_agents(agents)
 
     if sys.version_info >= (3, 11):
         print(f'Python: Installed ({sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro})')
@@ -34,7 +37,7 @@ def run_checks(root: Path, target_home: Path, probe_models: bool = False) -> int
         failures.append('Git')
 
     try:
-        state = generate(root, target_home, check=True)
+        state = generate(root, target_home, check=True, agents=selected)
         if state['changed']:
             print(f"Managed setup: {state['changed']} generated file(s) need installation or refresh.")
             failures.append('managed setup')
@@ -43,6 +46,7 @@ def run_checks(root: Path, target_home: Path, probe_models: bool = False) -> int
         retired = state.get('retained_obsolete', [])
         if retired:
             print('Managed setup: Retired package files remain and may still load: ' + ', '.join(retired))
+            print('Compare these files with the generated replacements, preserve any local edits, then remove only the obsolete copies yourself.')
             failures.append('retired managed files')
     except GenerationError:
         print('Managed setup: Cannot verify because a managed file conflicts with user content or package sources are incomplete.')
@@ -54,8 +58,10 @@ def run_checks(root: Path, target_home: Path, probe_models: bool = False) -> int
         print('Managed setup: Cannot verify because package configuration is invalid.')
         failures.append('managed setup')
 
-    commands = {name: _native_tool(name) for name in ('codex', 'claude', 'aws', 'twg')}
-    for name in ('codex', 'claude', 'aws', 'twg'):
+    names = tuple(name for name in ('codex', 'claude') if name in selected)
+    services = ('aws', 'twg') if check_services else ()
+    commands = {name: _native_tool(name) for name in names + services}
+    for name in names + services:
         label = {'codex': 'Codex CLI', 'claude': 'Claude Code', 'aws': 'AWS CLI', 'twg': 'TWG CLI'}[name]
         if commands[name]:
             print(f'{label}: Installed')
@@ -63,13 +69,15 @@ def run_checks(root: Path, target_home: Path, probe_models: bool = False) -> int
             print(f'{label}: Only a command shim is on PATH; install or update native {name}.exe.')
             failures.append(f'native {label}')
         else:
-            print(f'{label}: Missing; install it with install.ps1.')
+            instruction = (f'.\\install.ps1 -Agents {",".join(selected)} -IncludeServices'
+                           if name in services else f'.\\install.ps1 -Agents {name}')
+            print(f'{label}: Missing; install it with `{instruction}`.')
             failures.append(label)
 
-    codex_profile_ok = bool(commands['codex']) and _codex_profile_compatible(commands['codex'])
+    codex_profile_ok = bool(commands.get('codex')) and _codex_profile_compatible(commands['codex'])
     if codex_profile_ok:
         print('Codex profile support: Compatible with the generated standalone profile.')
-    elif commands['codex']:
+    elif commands.get('codex'):
         print('Codex profile support: Too old or unverified; update Codex to a version that supports `--profile <CONFIG_PROFILE_V2>`.')
         failures.append('Codex profile support')
 
@@ -78,6 +86,8 @@ def run_checks(root: Path, target_home: Path, probe_models: bool = False) -> int
         ('codex', 'Codex', ['login', 'status'], 'codex login'),
         ('claude', 'Claude', ['auth', 'status'], 'claude auth login'),
     ):
+        if name not in names:
+            continue
         executable = commands[name]
         if executable:
             signed_in[name] = _run([executable, *arguments]).returncode == 0
@@ -89,6 +99,36 @@ def run_checks(root: Path, target_home: Path, probe_models: bool = False) -> int
             print(f'{label} sign-in: Not verified; run `{instruction}` in PowerShell.')
             failures.append(f'{label} sign-in')
 
+    if check_services:
+        _check_services(commands, failures)
+    else:
+        print('AWS/TWG services: Optional; run --check-services if this work uses them.')
+
+    if 'cursor' in selected:
+        cursor_unverified = _cursor_models(config)
+        print('Cursor app: Discovery and account status require a manual check in Cursor.')
+        print('Cursor User Rules: Copy .agent-harness/cursor-user-rules.txt into Customize > Rules > User Rules.')
+        print('Cursor model status: Manual check required in Cursor settings; the CLI cannot verify Cursor account availability.')
+        print('Cursor model IDs: ' + ', '.join(sorted(cursor_unverified)))
+
+    if 'codex' in selected and 'claude' not in selected:
+        print('Cross-provider Claude review and routed models: Pending until Claude is installed and checked.')
+    if 'claude' in selected and 'codex' not in selected:
+        print('Cross-provider Codex aliases and automatic classifier: Pending until Codex is installed and checked. Use dispatch --host claude for native Claude work.')
+
+    if probe_models:
+        _check_models(config, commands, signed_in, names, codex_profile_ok, failures)
+    else:
+        print('Model availability: Configured values only; use --probe-models for live Codex/Claude checks. Cursor requires a manual check.')
+
+    if failures:
+        print('Setup is incomplete. Fix the items above, then run check.ps1 again.')
+        return 1
+    print('Selected setup checks passed; manual model and cross-provider checks may remain pending.')
+    return 0
+
+
+def _check_services(commands: dict[str, str | None], failures: list[str]) -> None:
     aws_profile = os.environ.get('AWS_PROFILE', '').strip()
     aws_ready = _aws_ready(commands['aws'], aws_profile)
     if aws_ready:
@@ -109,37 +149,32 @@ def run_checks(root: Path, target_home: Path, probe_models: bool = False) -> int
         print('TWG sign-in: Not verified; run `twg login`, then `twg setup bitbucket` in PowerShell.')
         failures.append('TWG sign-in')
 
-    cursor_unverified = _cursor_models(config)
-    print('Cursor app: ' + ('Found; model availability remains manual.' if _native_tool('cursor') else 'Not found on PATH; model availability remains manual.'))
-    print('Cursor model status: Manual check required in Cursor settings; the CLI cannot verify Cursor account availability.')
-    print('Cursor model IDs: ' + ', '.join(sorted(cursor_unverified)))
-    if cursor_unverified:
-        failures.append('Cursor model availability')
-
-    if probe_models:
-        codex_models = _codex_models(config)
-        claude_models = _claude_models(config)
+def _check_models(config: dict, commands: dict[str, str | None], signed_in: dict[str, bool],
+                  names: tuple[str, ...], codex_profile_ok: bool, failures: list[str]) -> None:
+    if 'codex' in names:
+        codex_models = _codex_models(config, include_cross_provider='claude' in names)
         codex_probe = _probe_codex_models(
             commands['codex'], codex_models, config['hosts']['codex'].get('reasoning_effort'),
             config['hosts']['codex']['model']) if signed_in['codex'] and commands['codex'] and codex_profile_ok else None
-        claude_probe = _probe_claude_models(
-            commands['claude'], claude_models, config['hosts']['claude'].get('reasoning_effort')) if signed_in['claude'] and commands['claude'] else None
         codex_ok = (codex_probe is not None and not codex_probe.get('catalog_error')
                     and not codex_probe['missing_models'] and not codex_probe['effort_incompatible'])
         if codex_ok:
             print(f"Codex model catalog: Verified {len(codex_models)} configured model(s), including supported reasoning effort.")
         else:
             print('Codex model catalog: Not verified for every configured model and reasoning effort; no substitute was tried.')
-            if codex_probe is None or codex_probe.get('catalog_error'):
-                for model in codex_models:
-                    setting = ', '.join(_model_settings(config, 'codex', model)) or 'configured Codex role'
-                    print(f'  Could not verify `{model}`; inspect {setting} and confirm Codex profile/sign-in support.')
+            for model in codex_models if codex_probe is None or codex_probe.get('catalog_error') else ():
+                setting = ', '.join(_model_settings(config, 'codex', model)) or 'configured Codex role'
+                print(f'  Could not verify `{model}`; inspect {setting} and confirm Codex profile/sign-in support.')
             for model in (codex_probe or {}).get('missing_models', []):
                 setting = ', '.join(_model_settings(config, 'codex', model)) or 'configured Codex role'
                 print(f'  `{model}` is absent from Codex model/list; inspect {setting} before changing it.')
             for model in (codex_probe or {}).get('effort_incompatible', []):
                 print(f"  `{model}` does not advertise `{config['hosts']['codex'].get('reasoning_effort')}`; inspect hosts.codex.reasoning_effort or that role's model.")
             failures.append('Codex model availability')
+    if 'claude' in names:
+        claude_models = _claude_models(config, include_cross_provider='codex' in names)
+        claude_probe = _probe_claude_models(
+            commands['claude'], claude_models, config['hosts']['claude'].get('reasoning_effort')) if signed_in['claude'] and commands['claude'] else None
         claude_ok = claude_probe is not None
         if claude_ok:
             print(f'Claude model probe: Verified {len(claude_models)} configured model(s) with returned model-usage identity.')
@@ -152,15 +187,6 @@ def run_checks(root: Path, target_home: Path, probe_models: bool = False) -> int
                 setting = ', '.join(_model_settings(config, 'claude', model)) or 'configured Claude route'
                 print(f'  Could not verify `{model}`; inspect {setting} and its exact model ID.')
             failures.append('Claude model availability')
-    else:
-        print('Codex/Claude model availability: Configured values only; use --probe-models for live checks.')
-        failures.extend(['Codex model availability', 'Claude model availability'])
-
-    if failures:
-        print('Setup is incomplete. Fix the unverified items above, then run check.ps1 again.')
-        return 1
-    print('Setup checks passed.')
-    return 0
 
 
 def _aws_ready(executable: str | None, profile: str) -> bool:
@@ -181,23 +207,25 @@ def _aws_ready(executable: str | None, profile: str) -> bool:
     return isinstance(value, dict) and bool(value.get('Account') and value.get('Arn') and value.get('UserId'))
 
 
-def _codex_models(config: dict) -> list[str]:
+def _codex_models(config: dict, include_cross_provider: bool = True) -> list[str]:
     result = {config['hosts']['codex']['model']}
     result.update(model for models in config['hosts']['codex']['roles'].values() for model in models
                   if config.get('routes', {}).get(model, 'codex') == 'codex')
-    result.update(alias.get('model') for aliases in config.get('aliases', {}).values()
-                  for alias in aliases.values() if alias.get('backend') == 'codex')
+    if include_cross_provider:
+        result.update(alias.get('model') for aliases in config.get('aliases', {}).values()
+                      for alias in aliases.values() if alias.get('backend') == 'codex')
     return sorted(model for model in result if isinstance(model, str))
 
 
-def _claude_models(config: dict) -> list[str]:
+def _claude_models(config: dict, include_cross_provider: bool = True) -> list[str]:
     result = {config['hosts']['claude']['model']}
     result.update(model for models in config['hosts']['claude']['roles'].values() for model in models
                   if model not in config.get('aliases', {}).get('claude', {}))
-    result.update(model for host in config['hosts'].values() for models in host.get('roles', {}).values()
-                  for model in models if config.get('routes', {}).get(model) == 'claude')
+    if include_cross_provider:
+        result.update(model for host in config['hosts'].values() for models in host.get('roles', {}).values()
+                      for model in models if config.get('routes', {}).get(model) == 'claude')
     independent = config.get('independent_review', {})
-    if independent.get('host') == 'claude' and isinstance(independent.get('model'), str):
+    if include_cross_provider and independent.get('host') == 'claude' and isinstance(independent.get('model'), str):
         result.add(independent['model'])
     return sorted(model for model in result if isinstance(model, str))
 

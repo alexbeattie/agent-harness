@@ -26,7 +26,7 @@ The comma rewrite and the swallowed bare `--` were reproduced on PowerShell 7.6.
 
 Fixes made after that review: wrappers rejoin array-valued arguments with commas and run the package they live in; the launcher writes UTF-8 to redirected output; check.ps1 reports the execution policy a normal terminal applies and whether harness, hx, haws and htwg resolve to the package; the installer removes bin folders of earlier package copies from the user PATH; the AWS guard refuses credential-printing commands (STS session and role credentials, ECR login passwords, KMS decrypt, SSM parameter history, configure export-credentials and credential keys, `--debug`) and prompts for ECS task definitions; command help after a subcommand runs as a read; the credential text match requires a header-shaped value; approval prompts show a `Will run` line and a `Rerun yourself` line with control characters escaped; dispatch and check.ps1 share one model-identity rule, so an alias such as opus verifies against the single reported identity; the classifier runs with the agent-harness profile and keeps Codex output out of `--classify-only`; `harness claude` passes the configured model explicitly; the version comes from the VERSION file alone; and the prove-it-works skill no longer names an unbundled skill.
 
-Not changed: the Cursor rule file still installs under the home folder, so WINDOWS-TEST.md now asks whether Cursor loads it; the classifier still inherits any MCP servers in the user's own Codex configuration; the reviewer's runtime questions about Python discovery, standard-user MSI installation, the Codex sandbox, Claude Code's shell and the TTY gate under agent consoles remain Windows acceptance items.
+At that revision, the Cursor rule file still installed under the home folder without an explicit User Rules import; the classifier inherited any MCP servers in the user's own Codex configuration; the reviewer's runtime questions about Python discovery, standard-user MSI installation, the Codex sandbox, Claude Code's shell and the TTY gate under agent consoles remain Windows acceptance items.
 
 ## Completed on October 9, 2026
 
@@ -46,10 +46,20 @@ The prior package passed the private-content pattern scan and manual source revi
 
 The renamed package passed 74 Python unit tests, the PowerShell 7.6.6 fixture on macOS, and `tools/package_release.py --check` for 101 selected source files. The fixture generated 104 files in an isolated home and made no live user-setting changes. The package name, Python import package, installed paths, profile and skill name changed together; the configured model values and external write guards were retained. Native Windows acceptance and independent review of this renamed package remain open.
 
+## Version 1.0.1 agent selection checks on October 9, 2026
+
+The Python 3.14 suite passed 82 tests. The PowerShell 7.6.6 fixture passed on macOS, including selected installs, mixed-case agent selectors, empty-selection rejection and check argument forwarding. Package checks passed for 101 selected source files. All PowerShell source files have CRLF line endings.
+
+Direct CLI generation into isolated homes produced 50 managed files for Cursor, 50 for Codex, 53 for Claude and 104 for all three. Repeating each command changed zero files. Regression tests cover adding an agent without erasing another agent's edits or ownership, retaining the obsolete Cursor rule for manual reconciliation, selected-agent sign-in failures and excluding calls to unselected agents and services.
+
+An independent read-only review exercised all seven nonempty agent combinations and upgrade preservation. It found a PowerShell/Python selector case mismatch; the correction passed focused rechecks with no remaining actionable findings. This was not a completed Claude or GPT-5.5 review.
+
+No native Windows install, paid model probe or live service write was run for this revision. Cursor discovery and User Rules import, each person's sign-in and model access, and optional cross-provider handoffs remain Windows acceptance checks.
+
 ## Windows acceptance remains required
 
 Follow WINDOWS-TEST.md under a new standard Windows user account and record the actual host versions and account model availability.
 
-Native installer execution, the effective execution policy, PATH after a full Cursor restart, Cursor skill and rule discovery, live model handoff with non-ASCII output, redirected-input refusal through a real standard-input pipe, Atlassian reads and AWS identity have not been established by tests on the Mac.
+Native installer execution, the effective execution policy, PATH after restarting the terminal application or its editor, Cursor skill and rule discovery, live model handoff with non-ASCII output, redirected-input refusal through a real standard-input pipe, Atlassian reads and AWS identity have not been established by tests on the Mac.
 
 The raw service CLIs and write-capable MCP connections can bypass a cooperative wrapper; use service permissions to enforce any stronger restriction.

@@ -1,7 +1,15 @@
-param([switch]$SkipTools)
+param([switch]$SkipTools, [string[]]$Agents = @('all'), [switch]$IncludeServices)
 $ErrorActionPreference = 'Stop'
 if ($SkipTools) { return }
 if ($env:OS -ne 'Windows_NT') { throw 'Tool installation requires native Windows. WSL is not used by this installer.' }
+if ($Agents.Count -eq 0) { throw 'Choose cursor, codex, claude, or all.' }
+$Agents = @($Agents | ForEach-Object {
+    if ([string]::IsNullOrWhiteSpace($_)) { throw 'Choose cursor, codex, claude, or all.' }
+    $_.ToLowerInvariant()
+})
+if ('all' -in $Agents -and $Agents.Count -ne 1) { throw 'Do not mix all with named agents.' }
+if (@($Agents | Where-Object { $_ -notin @('all', 'cursor', 'codex', 'claude') }).Count) { throw 'Choose cursor, codex, claude, or all.' }
+if ($Agents -eq 'all') { $Agents = @('cursor', 'codex', 'claude') }
 . (Join-Path (Split-Path -Parent $PSScriptRoot) 'bin/_common.ps1')
 
 function Get-NativeCommand {
@@ -70,16 +78,17 @@ function Install-SignedMsi {
 
 if (-not (Get-NativeCommand 'git')) { Invoke-WingetInstall 'Git.Git' }
 if (-not (Test-Python311)) { Invoke-WingetInstall 'Python.Python.3.13' }
-if (-not (Get-NativeCommand 'codex')) { Install-Codex }
-if (-not (Get-NativeCommand 'claude')) { Invoke-WingetInstall 'Anthropic.ClaudeCode' -Portable }
-if (-not (Get-NativeCommand 'aws')) {
+if ('cursor' -in $Agents) { Write-Host 'Cursor app: Install from the official Cursor download if needed; sign in and set User Rules in the app.' }
+if ('codex' -in $Agents -and -not (Get-NativeCommand 'codex')) { Install-Codex }
+if ('claude' -in $Agents -and -not (Get-NativeCommand 'claude')) { Invoke-WingetInstall 'Anthropic.ClaudeCode' -Portable }
+if ($IncludeServices -and -not (Get-NativeCommand 'aws')) {
     Install-SignedMsi 'https://awscli.amazonaws.com/AWSCLIV2-User.msi' 'Amazon' 'AWS CLI'
 }
-if (-not (Get-NativeCommand 'twg')) {
+if ($IncludeServices -and -not (Get-NativeCommand 'twg')) {
     $architecture = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()
     if ($architecture -eq 'Arm64') { $twgUrl = 'https://teamwork-graph.atlassian.com/cli/twg-windows-arm64.msi' }
     else { $twgUrl = 'https://teamwork-graph.atlassian.com/cli/twg-windows-x64.msi' }
     Install-SignedMsi $twgUrl 'Atlassian' 'TWG CLI'
 }
 
-Write-Host 'Required command-line tools are installed. No sign-in was started.'
+Write-Host 'Selected command-line tools are installed. No sign-in was started.'

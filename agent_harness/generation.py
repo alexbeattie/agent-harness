@@ -10,6 +10,31 @@ from .config import load_config, read_version
 class GenerationError(ValueError):
     pass
 
+AGENTS = ('cursor', 'codex', 'claude')
+
+
+def selected_agents(agents: tuple[str, ...] | list[str] | None = None) -> tuple[str, ...]:
+    names = tuple(agents or ('all',))
+    if 'all' in names:
+        if len(names) != 1:
+            raise GenerationError('Do not mix all with named agents.')
+        return AGENTS
+    if not names or any(name not in AGENTS for name in names):
+        raise GenerationError('Choose cursor, codex, claude, or all.')
+    return tuple(name for name in AGENTS if name in names)
+
+
+def _owners(name: str) -> set[str]:
+    if name.startswith('.agents/skills/'):
+        return {'cursor', 'codex'}
+    if name.startswith('.codex/') or name.endswith('/codex.toml.example'):
+        return {'codex'}
+    if name.startswith('.cursor/') or 'cursor' in name:
+        return {'cursor'}
+    if name.startswith('.agent-harness/claude-') or '/claude-plugin/' in name or name.endswith('/claude.json.example'):
+        return {'claude'}
+    return set(AGENTS)
+
 
 def skill_manifest(root: Path) -> list[dict]:
     try:
@@ -104,10 +129,10 @@ def desired_files(root: Path, config: dict) -> dict[str, bytes]:
     desired['.codex/agent-harness.config.toml'] = profile.encode()
     claude = config['hosts']['claude']
     desired['.agent-harness/claude-settings.json'] = _json({'model':claude['model'],'effortLevel':claude['reasoning_effort'],'alwaysThinkingEnabled':claude['always_thinking_enabled'],'permissions':{'defaultMode':'default'}})
-    cursor = ['---','description: Agent harness models and external write approval','alwaysApply: true','---','# Agent harness','',
+    cursor = ['# Agent harness','',
               'Use the installed repo-pstack-mode skill and its host-routing.md reference. Preserve the active repository rules. Resume follow-ups; start a fresh agent after an interrupt. Never silently fall back from a configured model. Use haws and htwg for external commands; never supply approval or bypass them through raw CLI, REST, SDK or MCP writes.','']
     cursor += [f"{role}: {', '.join(models)}" for role,models in config['hosts']['cursor']['roles'].items()]
-    desired['.cursor/rules/agent-harness.mdc'] = ('\n'.join(cursor)+'\n').encode()
+    desired['.agent-harness/cursor-user-rules.txt'] = ('\n'.join(cursor)+'\n').encode()
     desired['.agent-harness/mcp.template.json'] = _json({'_instructions':'Disabled templates. Get your own endpoint and token from the service administrator. Do not commit values. Follow docs/INSTALL.md before enabling.','connections':config['connections']})
     json_servers = {name: {'url': '', 'headers': {'Authorization': ''}} for name in config['connections']}
     desired['.agent-harness/mcp/cursor.json.example'] = _json({'mcpServers': json_servers})
@@ -125,17 +150,21 @@ def _json(value: object) -> bytes:
     return (json.dumps(value, indent=2,ensure_ascii=False)+'\n').encode()
 
 
-def generate(root: Path, target_home: Path, check: bool = False) -> dict:
+def generate(root: Path, target_home: Path, check: bool = False,
+             agents: tuple[str, ...] | list[str] | None = None) -> dict:
     root = root.resolve()
     target_home = target_home.absolute()
-    desired = desired_files(root, load_config(root))
+    selected = set(selected_agents(agents))
+    full_desired = desired_files(root, load_config(root))
+    desired = {name: data for name, data in full_desired.items() if _owners(name) & selected}
     state_path = target_home/'.agent-harness/install-state.json'
     _no_links(state_path, target_home)
     try:
         old = json.loads(state_path.read_text(encoding='utf-8')).get('files', {}) if state_path.exists() else {}
     except (OSError,ValueError) as error:
         raise GenerationError(f'Cannot read installation state: {error}') from error
-    retired = sorted(name for name in set(old)-set(desired) if (target_home/name).exists() or (target_home/name).is_symlink())
+    retired = sorted(name for name in set(old)-set(full_desired) if _owners(name) & selected
+                     and ((target_home/name).exists() or (target_home/name).is_symlink()))
     changed = []
     conflicts = []
     for name, data in desired.items():
@@ -159,7 +188,9 @@ def generate(root: Path, target_home: Path, check: bool = False) -> dict:
         path.parent.mkdir(parents=True,exist_ok=True)
         _no_links(path,target_home)
         _atomic(path,desired[name])
-    state = _json({'schema_version':1,'files':{**{name:old[name] for name in retired}, **{name:_hash(data) for name,data in desired.items()}}})
+    preserved = {name: digest for name, digest in old.items() if name not in desired and
+                 ((target_home/name).exists() or (target_home/name).is_symlink())}
+    state = _json({'schema_version':1,'files':{**preserved, **{name:_hash(data) for name,data in desired.items()}}})
     state_path.parent.mkdir(parents=True,exist_ok=True)
     if not state_path.exists() or state_path.read_bytes()!=state:
         _atomic(state_path,state)

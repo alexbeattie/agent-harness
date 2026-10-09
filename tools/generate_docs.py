@@ -22,7 +22,7 @@ def generate(root: Path=ROOT) -> None:
             raise ValueError(f"Skill identity differs from its manifest: {source}")
         lines.extend([f"## {skill['name']}",'',skill['description'],'',f"When to use it: {skill['when'].rstrip('.')}.",'',
                       f"Example: `{skill['example']}`",'',
-                      'Runs in Cursor and Codex through the shared installed skills, and in Claude through the generated team plugin.','',
+                      'Runs in Cursor and Codex through the shared installed skills, and in Claude as `/agent-harness:'+skill['name']+'` through the generated team plugin.','',
                       f"Limits and requirements: {skill['limits']}",'',
                       f"Source: [{skill['source']}/SKILL.md](../{skill['source']}/SKILL.md).",''])
         if skill['dependencies']:
@@ -30,7 +30,7 @@ def generate(root: Path=ROOT) -> None:
     (root/'docs/SKILLS.md').write_text('\n'.join(lines),encoding='utf-8')
     lines=['# How the setup works','',
            'This document is generated from the maintained configuration, skill manifest and runtime files.','',
-           'The source of truth is this repository. The installer generates files for each user and records their hashes so a rerun can detect local edits.','',
+           'The source of truth is this repository. The installer generates files for each selected agent and records their hashes so a rerun can detect local edits. `-Agents` accepts cursor, codex, claude, or all (the default); repeatable `--agent` does the same in Python. A later selected install preserves files and ownership for unselected agents.','',
            '## Task flow','',
            'Cursor uses its own agent. Codex and Claude are separate programs launched in the terminal. The team skills tell each host to read its own configured model roles.','',
            'harness dispatch reads task text, validates the configuration, then either uses your chosen host or asks Codex to classify the task.','',
@@ -42,7 +42,7 @@ def generate(root: Path=ROOT) -> None:
            '## Installed files','',
            '| Location under your home folder | Purpose |','|---|---|',
            '| .agents/skills | One shared installed set discovered by Cursor and Codex. |',
-           '| .cursor/rules/agent-harness.mdc | Cursor model roles and external write rules. |',
+           '| .agent-harness/cursor-user-rules.txt | Cursor model roles and external write rules to copy into Customize > Rules > User Rules. Generation alone does not activate them. |',
            '| .codex/agent-harness.config.toml | Named Codex profile used by harness codex. |',
            '| .agent-harness/claude-settings.json | Claude model and permission settings used by the wrapper. |',
            '| .agent-harness/claude-plugin | Claude copies of the shared skills and agent instructions. |',
@@ -68,7 +68,7 @@ def generate(root: Path=ROOT) -> None:
            '| max_parallel_agents | Maximum simultaneous agents requested by the generated instructions. |',
            '| tools | Executable names or paths for the local programs. |',
            '| connections | Disabled optional service endpoints and names of per-user token environment variables. |','',
-           'Model support and account entitlement can differ by host. A configured name is not evidence that an account can use it. check.ps1 distinguishes tested values from checks that still need the host UI or an authenticated probe.','']
+           'Model support and account entitlement can differ by host. A configured name is not evidence that an account can use it. check.ps1 checks selected host tools and sign-in, leaves model availability pending unless -ProbeModels is passed, and requires a manual Cursor model check. AWS and TWG installation and readiness checks run only with -IncludeServices. Cross-provider roles and automatic Codex classification remain pending when their other host is unselected.','']
     for host,settings in config['hosts'].items():
         lines.extend([f'### {host} settings','', '```json',json.dumps(settings,indent=2),'```',''])
     lines.extend(['## Runtime source files','',

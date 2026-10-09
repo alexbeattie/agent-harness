@@ -1,50 +1,52 @@
-# Use the team setup
+# Use the harness
 
-Open a repository in Cursor, then choose Terminal > New Terminal and select PowerShell.
+Open a project in Cursor or open PowerShell in the project folder for Codex CLI or Claude Code. The terminal can be standalone or inside another editor.
 
-If you moved the package folder, rerun install.ps1 before using these commands.
+If you moved the package folder, rerun install.ps1 with your agent selection before using the commands.
 
 ## First task in Cursor
 
-Open Cursor's agent chat and enter `/repo-pstack-mode`.
+Open a new Agent chat and enter `/repo-pstack-mode`.
 
-Ask: `Read this repository's instructions. Explain how its tests run and propose a small improvement. Do not edit or publish anything yet.`
+Use this prompt: `Read this repository's instructions. Explain how its tests run and propose a small improvement. Do not edit or publish anything yet.`
 
-The agent should identify the repository rules, describe the tests and use the configured role models when it delegates.
+Check that it reads the installed skill and Cursor model roles. Import the generated rule template into User Rules as described in [INSTALL.md](INSTALL.md).
 
-If a model is unavailable, stop and follow the error's configuration setting; do not accept a silent substitute.
+## First task in Codex CLI
 
-## First task in Codex
+Run `harness codex` from the project folder and enter `$repo-pstack-mode`, followed by the same read-only prompt.
 
-Run `harness codex` in the repository's terminal.
+The wrapper starts Codex with the generated profile. The plain `codex` command can use different personal defaults.
 
-Enter `$repo-pstack-mode`, then use the same first-task prompt.
+## First task in Claude Code
 
-This starts Codex with the generated team profile; the plain `codex` command can use different personal defaults.
+Run `harness claude` from the project folder and enter `/agent-harness:repo-pstack-mode`, followed by the same read-only prompt.
 
-Review the proposed changes and test results before asking it to implement or publish work.
+This starts an interactive Claude Code session with the generated settings and plugin. Confirm it reads the Claude roles. You can carry out the whole task here without opening Cursor or Codex.
 
-## Hand work to Claude
+For every agent, review the proposed changes and test results before asking it to implement or publish work. If a required model or review dependency is unavailable, leave that step incomplete and name the setting or dependency. Never accept a silent substitute.
 
-Create a UTF-8 file named task.txt outside the repository's tracked files and describe the task, the relevant files, constraints and desired result.
+## Terminal handoffs and automatic routing
 
-Run `harness dispatch --host claude --task-file task.txt --read-only` for a review or explanation.
+Create a UTF-8 task.txt outside tracked files. Describe the task, relevant files, constraints and desired result.
 
-The answer appears in the terminal so you can return it to Codex with your next instruction.
+Use an explicit host for a read-only explanation:
 
-Remove `--read-only` only when you intend to allow repository edits under Claude's normal permission checks.
+```powershell
+harness dispatch --host claude --task-file task.txt --read-only
+harness dispatch --host codex --task-file task.txt --read-only
+```
 
-A noninteractive handoff cannot answer a permission prompt on your behalf; if it stops for approval, continue in `harness claude`.
+Choose the line for the installed agent. Explicit host selection avoids the Codex classifier. The answer appears in the terminal.
 
-For automatic routing, run `harness dispatch --task-file task.txt`.
+Remove `--read-only` only when you intend to allow edits under the host's normal permission checks. A headless handoff cannot answer an approval prompt for you; continue in `harness claude` or `harness codex` if approval is needed.
 
-To inspect the decision without running the task, add `--classify-only`; this still calls Codex to classify the text and consumes account quota.
+`harness dispatch --task-file task.txt` asks Codex to classify the task and can dispatch to either CLI, so install and sign in to both for automatic routing. `--classify-only` inspects the decision without carrying out the task, but still calls Codex and consumes quota.
 
-Use `--quota-used 60` when 60 percent of your Codex allowance is used.
+Use `--quota-used 60` when 60 percent of your Codex allowance is used. The dispatcher does not inspect session histories or account files to estimate quota and does not keep a task ledger. Each agent can retain its own history according to its settings.
 
-The dispatcher does not read session histories or account files to estimate quota, and it does not keep its own task ledger.
+Claude's `astra` role routes through Codex. Codex panels containing Claude models and the configured independent Claude review need Claude Code. A selected-agent check does not establish that these cross-provider workflows are ready.
 
-The underlying agent applications can retain their own history according to their settings.
 
 ## Jira and Bitbucket
 
@@ -90,6 +92,6 @@ Keep the role lists separate because Cursor model identifiers can differ from te
 
 Set max_parallel_agents to the number you want to allow at once.
 
-Run install.ps1 again to regenerate the installed files, then run check.ps1 -ProbeModels and verify Cursor's configured models in its UI.
+Rerun install.ps1 with your agent selection, then run check.ps1 with the same selection and -ProbeModels for CLI model checks. Cursor users must refresh their copied User Rules and verify configured models in the UI.
 
 An unavailable model must stop its role and name the setting to change; the package has no fallback-model setting.

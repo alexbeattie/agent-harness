@@ -52,7 +52,7 @@ This package's TWG guidance is independently written around the command wrapper.
 
 Give them the reviewed repository or ZIP and the installation guide.
 
-Have them use their own Windows account and sign in separately to Cursor, Codex, Claude Code, Atlassian and AWS.
+Have them use their own Windows account and sign in to each selected agent. Atlassian and AWS sign-ins are needed only when they use those services.
 
 Grant company service access through the normal administrators; do not send a copy of another person's configuration or token.
 
